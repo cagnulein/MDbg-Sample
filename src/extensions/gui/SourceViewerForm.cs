@@ -453,6 +453,7 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.richText.Text = "richText";
             this.richText.WordWrap = false;
             this.richText.KeyDown += new System.Windows.Forms.KeyEventHandler(this.richText_KeyDown);
+            this.richText.DoubleClick += RichText_DoubleClick;
             this.richText.VScroll += new System.EventHandler(this.richText_VScroll);
             this.richText.Invalidated += new System.Windows.Forms.InvalidateEventHandler(this.richText_VScroll);
             this.richText.TextChanged += new System.EventHandler(this.richText_TextChanged);
@@ -476,6 +477,13 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.ResumeLayout(false);
 
         }
+
+        private void RichText_DoubleClick(object sender, EventArgs e)
+        {
+            int row = 1 + richText.GetLineFromCharIndex(richText.SelectionStart);
+            this.ToggleBreakpointAtLine(row);
+        }
+
         //#endregion
 
         // The main source window.
