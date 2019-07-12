@@ -20,6 +20,7 @@ using Microsoft.Samples.Debugging.CorDebug;
 using Microsoft.Samples.Debugging.CorMetadata;
 using Microsoft.Samples.Debugging.CorDebug.NativeApi;
 using Microsoft.Samples.Debugging.CorPublish;
+using System.Diagnostics;
 
 namespace gui
 {
@@ -61,40 +62,89 @@ namespace gui
         void RefreshProcesses()
         {
             this.listBoxProcesses.Items.Clear();
-
-            CorPublish cp = null;
+            int count = 0;
 
             int curPid = System.Diagnostics.Process.GetCurrentProcess().Id;
-            try
-            {
-                int count = 0;
 
-                cp = new CorPublish();
-                {                   
-                    foreach (CorPublishProcess cpp in cp.EnumProcesses())
+            foreach (Process p in Process.GetProcesses())
+            {
+
+                if (Process.GetCurrentProcess().Id == p.Id)  // let's hide our process
+                {
+                    continue;
+                }
+
+                //list the loaded runtimes in each process, if the ClrMetaHost APIs are available
+                CLRMetaHost mh = null;
+                try
+                {
+                    mh = new CLRMetaHost();
+                }
+                catch (System.EntryPointNotFoundException)
+                {
+                    // Intentionally ignore failure to find GetCLRMetaHost().
+                    // Downlevel we don't have one.
+                    continue;
+                }
+
+                IEnumerable<CLRRuntimeInfo> runtimes = null;
+                try
+                {
+                    runtimes = mh.EnumerateLoadedRuntimes(p.Id);
+                }
+                catch (System.ComponentModel.Win32Exception e)
+                {
+                    if ((e.NativeErrorCode != 0x0) &&           // The operation completed successfully.
+                        (e.NativeErrorCode != 0x3f0) &&         // An attempt was made to reference a token that does not exist.
+                        (e.NativeErrorCode != 0x5) &&           // Access is denied.
+                        (e.NativeErrorCode != 0x57) &&          // The parameter is incorrect.
+                        (e.NativeErrorCode != 0x514) &&         // Not all privileges or groups referenced are assigned to the caller.
+                        (e.NativeErrorCode != 0x12))            // There are no more files.
                     {
-                        if (curPid != cpp.ProcessId)  // let's hide our process
-                        {
-                            string version = CorDebugger.GetDebuggerVersionFromPid(cpp.ProcessId);
-                            string s = "[" + cpp.ProcessId + "] [ver=" + version + "] " + cpp.DisplayName;
-                            this.listBoxProcesses.Items.Add(new Item(cpp.ProcessId, s));
-                            count++;
-                        }
+                        // Unknown/unexpected failures should be reported to the user for diagnosis.
+                        Console.WriteLine("Error retrieving loaded runtime information for PID " + p.Id
+                            + ", error " + e.ErrorCode + " (" + e.NativeErrorCode + ") '" + e.Message + "'");
                     }
 
-                } // using
+                    // If we failed, don't try to print out any info.
+                    if ((e.NativeErrorCode != 0x0) || (runtimes == null))
+                    {
+                        continue;
+                    }
+                }
+                catch (System.Runtime.InteropServices.COMException e)
+                {
+                    if (e.ErrorCode != (int)HResult.E_PARTIAL_COPY)  // Only part of a ReadProcessMemory or WriteProcessMemory request was completed.
+                    {
+                        // Unknown/unexpected failures should be reported to the user for diagnosis.
+                        Console.WriteLine("Error retrieving loaded runtime information for PID " + p.Id
+                            + ", error " + e.ErrorCode + "\n" + e.ToString());
+                    }
 
-                if (count == 0)
-                {
-                    this.listBoxProcesses.Items.Add(new Item(0, "(No active processes)"));
+                    continue;
                 }
-            }            
-            catch(Exception)
+
+                //if there are no runtimes in the target process, don't print it out
+                if (!runtimes.GetEnumerator().MoveNext())
+                {
+                    continue;
+                }
+
+                count++;
+
+
+                string version = "";
+                foreach (CLRRuntimeInfo rti in runtimes)
+                {
+                    version += rti.GetVersionString();
+                }                
+                string s = "[" + p.Id + "] [ver=" + version + "] " + p.MainModule.FileName;
+                this.listBoxProcesses.Items.Add(new Item(p.Id, s));
+            }
+
+            if (count == 0)
             {
-                if (cp == null)
-                {
-                    this.listBoxProcesses.Items.Add(new Item(0, "(Can't enumerate processes"));
-                }
+                this.listBoxProcesses.Items.Add(new Item(0, "(No active processes)"));
             }
         }
 
