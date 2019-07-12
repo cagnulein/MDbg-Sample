@@ -54,6 +54,7 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
         private MenuItem menuItemKill;
         private MenuItem menuItem4;
         private MenuItem menuItemViewIlOrSource;
+        private MenuItem menuItemGo;
         private System.Windows.Forms.MenuItem breakCmd;
 
         public MainForm(IMDbgShell ui)
@@ -114,12 +115,15 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.testNewCmd = new System.Windows.Forms.MenuItem();
             this.QuitUICmd = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
+            this.menuItemGo = new System.Windows.Forms.MenuItem();
             this.breakCmd = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
             this.menuItemLaunch = new System.Windows.Forms.MenuItem();
             this.menuItemAttach = new System.Windows.Forms.MenuItem();
             this.menuItemDetach = new System.Windows.Forms.MenuItem();
             this.menuItemKill = new System.Windows.Forms.MenuItem();
+            this.menuItem4 = new System.Windows.Forms.MenuItem();
+            this.menuItemViewIlOrSource = new System.Windows.Forms.MenuItem();
             this.menuItemView = new System.Windows.Forms.MenuItem();
             this.menuItemViewOpen = new System.Windows.Forms.MenuItem();
             this.menuItemViewClose = new System.Windows.Forms.MenuItem();
@@ -136,8 +140,6 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.cmdInput = new System.Windows.Forms.TextBox();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
-            this.menuItemViewIlOrSource = new System.Windows.Forms.MenuItem();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -174,6 +176,7 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             // 
             this.menuItem2.Index = 1;
             this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItemGo,
             this.breakCmd,
             this.menuItem6,
             this.menuItemLaunch,
@@ -184,40 +187,58 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.menuItemViewIlOrSource});
             this.menuItem2.Text = "&Debug";
             // 
+            // menuItemGo
+            // 
+            this.menuItemGo.Index = 0;
+            this.menuItemGo.Shortcut = System.Windows.Forms.Shortcut.F5;
+            this.menuItemGo.Text = "&Go";
+            this.menuItemGo.Click += new System.EventHandler(this.menuItemGo_Click);
+            // 
             // breakCmd
             // 
-            this.breakCmd.Index = 0;
+            this.breakCmd.Index = 1;
             this.breakCmd.Text = "&Break";
             this.breakCmd.Click += new System.EventHandler(this.breakCmd_Click);
             // 
             // menuItem6
             // 
-            this.menuItem6.Index = 1;
+            this.menuItem6.Index = 2;
             this.menuItem6.Text = "-";
             // 
             // menuItemLaunch
             // 
-            this.menuItemLaunch.Index = 2;
+            this.menuItemLaunch.Index = 3;
             this.menuItemLaunch.Text = "Launch ...";
             this.menuItemLaunch.Click += new System.EventHandler(this.menuItemLaunch_Click);
             // 
             // menuItemAttach
             // 
-            this.menuItemAttach.Index = 3;
+            this.menuItemAttach.Index = 4;
             this.menuItemAttach.Text = "Attach ...";
             this.menuItemAttach.Click += new System.EventHandler(this.menuItemAttach_Click);
             // 
             // menuItemDetach
             // 
-            this.menuItemDetach.Index = 4;
+            this.menuItemDetach.Index = 5;
             this.menuItemDetach.Text = "Detach";
             this.menuItemDetach.Click += new System.EventHandler(this.menuItemDetach_Click);
             // 
             // menuItemKill
             // 
-            this.menuItemKill.Index = 5;
+            this.menuItemKill.Index = 6;
             this.menuItemKill.Text = "Kill";
             this.menuItemKill.Click += new System.EventHandler(this.menuItemKill_Click);
+            // 
+            // menuItem4
+            // 
+            this.menuItem4.Index = 7;
+            this.menuItem4.Text = "-";
+            // 
+            // menuItemViewIlOrSource
+            // 
+            this.menuItemViewIlOrSource.Index = 8;
+            this.menuItemViewIlOrSource.Text = "View Il";
+            this.menuItemViewIlOrSource.Click += new System.EventHandler(this.menuItem8_Click);
             // 
             // menuItemView
             // 
@@ -326,8 +347,8 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.cmdInput.Name = "cmdInput";
             this.cmdInput.Size = new System.Drawing.Size(548, 20);
             this.cmdInput.TabIndex = 8;
-            this.cmdInput.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cmdInput_KeyPress);
             this.cmdInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cmdInput_KeyDown);
+            this.cmdInput.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.cmdInput_KeyPress);
             // 
             // splitter1
             // 
@@ -339,17 +360,6 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.splitter1.Size = new System.Drawing.Size(568, 6);
             this.splitter1.TabIndex = 0;
             this.splitter1.TabStop = false;
-            // 
-            // menuItem4
-            // 
-            this.menuItem4.Index = 6;
-            this.menuItem4.Text = "-";
-            // 
-            // menuItemViewIlOrSource
-            // 
-            this.menuItemViewIlOrSource.Index = 7;
-            this.menuItemViewIlOrSource.Text = "View Il";
-            this.menuItemViewIlOrSource.Click += new System.EventHandler(this.menuItem8_Click);
             // 
             // MainForm
             // 
@@ -365,8 +375,8 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.Text = "GUI: Simple MDbg Extension";
             this.Activated += new System.EventHandler(this.MainForm_Activated);
             this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
@@ -1150,13 +1160,14 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
         // This must be called on the UI thread.
         private void SetCommandInputState(bool OnOff)
         {
-            // Enable / disable UI elements.
-            cmdInput.Enabled = OnOff;
-            breakCmd.Enabled=!OnOff;
-
             // Although the underlying MDbg engine supports multiple processes,
             // We'll only support 1 process from the UI to keep things simple.             
             bool fHasProcess = GuiExtension.Debugger.Processes.HaveActive;
+
+            // Enable / disable UI elements.
+            cmdInput.Enabled = OnOff;
+            breakCmd.Enabled = !OnOff;
+            menuItemGo.Enabled = OnOff && fHasProcess;
 
             // If we're stopped, and we don't already have a process, then allow creating one.
             bool fAllowCreate = OnOff && !fHasProcess;
@@ -1552,5 +1563,16 @@ namespace Microsoft.Samples.Tools.Mdbg.Extension
             this.Invalidate();
         }
 
+        private void menuItemGo_Click(object sender, EventArgs e)
+        {
+            if (!GuiExtension.Debugger.Processes.HaveActive)
+            {
+                // Nothing to do. Not sure how we'd ever get here because the 
+                // UI shoul dhave disabled us, but just in case ...
+                return;
+            }
+
+            AsyncProcessEnteredText("go");
+        }
     } // end MainForm
 }
