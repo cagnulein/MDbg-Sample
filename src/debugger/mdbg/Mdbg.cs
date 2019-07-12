@@ -242,6 +242,7 @@ namespace Microsoft.Samples.Tools.Mdbg
             try
             {
                 (new CorDebugger(CorDebugger.GetDefaultDebuggerVersion())).CanLaunchOrAttach(0, false);
+                MdbgCommands.LoadCmd("gui");
             }
             catch (System.Runtime.InteropServices.COMException e)
             {
